@@ -6,6 +6,7 @@ Created on 2018年8月5日
 Jiangxi university of finance and economics
 '''
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 from datetime import datetime
 import threading
@@ -30,7 +31,8 @@ import re
 def weibo_repost(all_company_weibo,con):#获取每条微博的转发用户信息
     m =0
     try:
-        for i in all_company_weibo:
+        for index ,i in all_company_weibo[0:].iterrows():
+            #print(i)
             companyNo=str(i['companyNo'])
             mblog_id=str(i['mblog_id'])
             weiboName=str(i['weiboName'])
@@ -48,8 +50,8 @@ def weibo_repost(all_company_weibo,con):#获取每条微博的转发用户信息
                 page=int(total_num/10)
                 if page==0:
                     page=1
-                if page>10:#最多抓取100个
-                    page=10
+                if page>10:#最多抓取60个
+                    page=6
                     for j in range(1,page):
                     
                         Url='https://m.weibo.cn/api/statuses/repostTimeline?id='+str(mblog_id)+'&page='+str(j)
@@ -92,9 +94,14 @@ def connectMysql(connection,weiboName,create_time,companyNo,mblog_id,user_screen
 if __name__ == '__main__':
 
     conn = pymysql.connect(host='127.0.0.1', user='root', password='147258', db='weibo_company', charset='utf8mb4')
-    mongo_con=MongoClient('localhost', 27017)
-    db=mongo_con.weiboCompany
-    all_company_weibo=db.company_weibo_detail.find()
+#     mongo_con=MongoClient('localhost', 27017)
+#     db=mongo_con.weiboCompany
+#     all_company_weibo=db.company_weibo_detail.find()
+#     all_company_weibo=pd.read_csv('company_weibo_detail.csv')
+#     all_company_weibo=all_company_weibo.drop_duplicates().reset_index().drop('index',axis=1)
+#     all_company_weibo.to_csv('all_company_weibo_1.csv')
+    all_company_weibo=pd.read_csv('all_company_weibo_1.csv')
+    #print(all_company_weibo)
     weibo_repost(all_company_weibo,conn)
-    mongo_con.close()
+    #mongo_con.close()
     conn.close()
